@@ -15,7 +15,7 @@ This is better than constantly scanning for functions
 ~~~
 
 In reality, we can't watch Functions, we need to watch HPAs instead...
-Functions only exists if the CRD is installed, which is not required
+Functions only exist if the CRD is installed, which is not required
 if you are using the CLI.
 
 The approach should be listing and watching HPAs that contain the

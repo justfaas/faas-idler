@@ -66,7 +66,7 @@ internal sealed class IdlerService : BackgroundService
         */
 
         var hpas = await client.GetHorizontalPodAutoscalersAsync(
-            ex => logger.LogError( $"Failed to retrieve scaling information: {ex.Message}" )
+            ex => logger.LogError( "Failed to retrieve scaling information. {Error}", ex.Message )
         );
 
         if ( !hpas.Any() )
@@ -99,13 +99,18 @@ internal sealed class IdlerService : BackgroundService
             ns,
             name,
             metricName,
-            ex => logger.LogError( $"Failed to retrieve metrics: {ex.Message}" )
+            ex => logger.LogError( "Failed to retrieve metrics. {Error}", ex.Message )
         );
 
         if ( metric == null )
         {
             // metrics not found!
-            logger.LogWarning( $"Unable to find '{metricName}' metric value for {ns}.{name}." );
+            logger.LogWarning(
+                "Unable to find '{metricName}' metric value for {ns}.{name}.",
+                metricName,
+                ns,
+                name
+            );
             return;
         }
 
@@ -152,11 +157,18 @@ internal sealed class IdlerService : BackgroundService
             {
                 await client.AppsV1.ScaleAsync( ns, hpa.Spec.ScaleTargetRef.Name, 0 );
 
-                logger.LogInformation( $"deployment.apps/{hpa.Spec.ScaleTargetRef.Name} scaled to zero." );
+                logger.LogInformation(
+                    "deployment.apps/{Name} scaled to zero.",
+                    hpa.Spec.ScaleTargetRef.Name
+                );
             }
             catch ( Exception ex )
             {
-                logger.LogError( $"deployment.apps/{hpa.Spec.ScaleTargetRef.Name} scaling failed. {ex.Message}" );
+                logger.LogError( 
+                    "deployment.apps/{Name} scaling failed. {Error}",
+                    hpa.Spec.ScaleTargetRef.Name,
+                    ex.Message
+                );
             }
         }
 
@@ -189,11 +201,18 @@ internal sealed class IdlerService : BackgroundService
             {
                 await client.AppsV1.ScaleAsync( ns, hpa.Spec.ScaleTargetRef.Name, hpa.Spec.MinReplicas ?? 1 );
 
-                logger.LogInformation( $"deployment.apps/{hpa.Spec.ScaleTargetRef.Name} restored." );
+                logger.LogInformation(
+                    "deployment.apps/{Name} restored.",
+                    hpa.Spec.ScaleTargetRef.Name
+                );
             }
             catch ( Exception ex )
             {
-                logger.LogError( $"deployment.apps/{hpa.Spec.ScaleTargetRef.Name} scaling failed. {ex.Message}" );
+                logger.LogError(
+                    "deployment.apps/{Name} scaling failed. {Error}",
+                    hpa.Spec.ScaleTargetRef.Name,
+                    ex.Message
+                );
             }
         }
 
